@@ -49,7 +49,7 @@ jobs:
       run: |
         version=$TAG
         echo "version=$TAG" >> $GITHUB_ENV
-        echo "urlRelease=https://github.com/KyleKolander/nuget-utilities/releases/tag/$version" >> $GITHUB_ENV
+        echo "urlRelease=https://github.com/KyleKolander/nuget-utilities/releases/tag/v$version" >> $GITHUB_ENV
         echo "releaseNameSummarizerWindows=Summarizer-$version-win-x64" >> $GITHUB_ENV
         echo "releaseNameSummarizerLinux=Summarizer-$version-linux-x64" >> $GITHUB_ENV
         echo "releaseNameSummarizerMac=Summarizer-$version-osx-x64" >> $GITHUB_ENV
