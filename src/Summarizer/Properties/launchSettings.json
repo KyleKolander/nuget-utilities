@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "Summarizer": {
+      "commandName": "Project",
+      "commandLineArgs":
+        "--id MailKit --version 2.15.0 --framework net5.0 --install --transitive --tree --contents --assemblies --powerShell"
+    }
+  }
+}

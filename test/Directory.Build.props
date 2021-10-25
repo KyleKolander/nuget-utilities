@@ -1,0 +1,38 @@
+<Project>
+	<PropertyGroup>
+		<TargetFramework>net5.0</TargetFramework>
+		<RuntimeIdentifiers>win-x64;linux-x64;osx-x64</RuntimeIdentifiers>
+		<RestoreUseStaticGraphEvaluation>true</RestoreUseStaticGraphEvaluation>
+		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+		<NeutralLanguage>en-US</NeutralLanguage>
+		<IsPackable>false</IsPackable>
+	</PropertyGroup>
+	<PropertyGroup>
+		<RunSettingsFilePath>$(MSBuildProjectDirectory)\test.runsettings</RunSettingsFilePath>
+	</PropertyGroup>
+	<PropertyGroup Label="coverlet.msbuild">
+		<CollectCoverage>true</CollectCoverage>
+		<CoverletOutputFormat>cobertura</CoverletOutputFormat>
+		<CoverletOutput>../CoverageResults/$(MSBuildProjectName)_coverage.cobertura.xml</CoverletOutput>
+		<DeterministicReport>true</DeterministicReport>
+		<SkipAutoProps>true</SkipAutoProps>
+		<IncludeTestAssembly>false</IncludeTestAssembly>
+		<SingleHit>false</SingleHit>
+		<ExcludeByAttribute>Obsolete,GeneratedCodeAttribute,CompilerGeneratedAttribute,ExcludeFromCodeCoverageAttribute</ExcludeByAttribute>
+		<UseSourceLink>false</UseSourceLink>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="coverlet.msbuild" Version="3.*">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="nunit" Version="3.*" />
+		<PackageReference Include="NUnit3TestAdapter" Version="3.*" />
+		<PackageReference Include="NunitXml.TestLogger" Version="3.*" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.*" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\src\Core\Core.csproj" />
+		<ProjectReference Include="..\..\src\Summarizer\Summarizer.csproj" />
+	</ItemGroup>
+</Project>

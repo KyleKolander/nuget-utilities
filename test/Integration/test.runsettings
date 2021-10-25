@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<RunSettings>
+
+	<RunConfiguration>
+		<MaxCpuCount>1</MaxCpuCount>
+		<ResultsDirectory>../../test/TestResults</ResultsDirectory>
+		<TestSessionTimeout>600000</TestSessionTimeout>
+		<TreatNoTestsAsError>true</TreatNoTestsAsError>
+		<DesignMode>false</DesignMode>
+		<DisableParallelization>false</DisableParallelization>
+		<DisableAppDomain>false</DisableAppDomain>
+		<CollectSourceInformation>true</CollectSourceInformation>
+		<BatchSize>10</BatchSize>
+	</RunConfiguration>
+
+	<LoggerRunSettings>
+		<Loggers>
+			<Logger friendlyName="console" enabled="True">
+				<Configuration>
+					<Verbosity>detailed</Verbosity>
+				</Configuration>
+			</Logger>
+			<Logger friendlyName="trx" enabled="True">
+				<Configuration>
+					<LogFileName>Integration_TestResults.trx</LogFileName>
+				</Configuration>
+			</Logger>
+			<Logger friendlyName="nunit" enabled="True">
+				<Configuration>
+					<LogFileName>Integration_TestResults.xml</LogFileName>
+				</Configuration>
+			</Logger>
+			<Logger friendlyName="html" enabled="True">
+				<Configuration>
+					<LogFileName>Integration_TestResults.html</LogFileName>
+				</Configuration>
+			</Logger>
+		</Loggers>
+	</LoggerRunSettings>
+
+	<NUnit>
+		<DefaultTestNamePattern>{m}{a}</DefaultTestNamePattern>
+		<InternalTraceLevel>Off</InternalTraceLevel>
+		<NumberOfTestWorkers>-1</NumberOfTestWorkers>
+		<Verbosity>0</Verbosity>
+		<UseVsKeepEngineRunning>false</UseVsKeepEngineRunning>
+		<DefaultTimeout>0</DefaultTimeout>
+		<ShowInternalProperties>true</ShowInternalProperties>
+		<ConsoleOut>1</ConsoleOut>
+		<UseTestNameInConsoleOutput>true</UseTestNameInConsoleOutput>
+		<StopOnError>false</StopOnError>
+		<SkipNonTestAssemblies>true</SkipNonTestAssemblies>
+		<AssemblySelectLimit>2000</AssemblySelectLimit>
+	</NUnit>
+
+</RunSettings>

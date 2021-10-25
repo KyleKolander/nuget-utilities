@@ -1,0 +1,144 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  buildConfiguration: Release
+  outDirPack: nupkgs
+  outDirPublish: publish
+  outDirRelease: release
+  csprojPathCore: src/Core/Core.csproj
+  csprojPathSummarizer: src/Summarizer/Summarizer.csproj
+  urlNupkg: https://nuget.pkg.github.com/KyleKolander/index.json
+  urlNuGet: https://api.nuget.org/v3/index.json
+  urlNuGetTest: https://apiint.nugettest.org/v3/index.json
+  DOTNET_NOLOGO: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  release:
+    name: "Release"
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: checkout repository
+      uses: actions/checkout@v2
+
+    - name: setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+
+    - name: dotnet info
+      run: dotnet --info
+
+    - name: get tag
+      id: tag
+      uses: dawidd6/action-get-tag@v1
+      with:
+        strip_v: true
+
+    - name: set environment variables
+      shell: bash
+      env:
+        TAG: ${{ steps.tag.outputs.tag }}
+      run: |
+        version=$TAG
+        echo "version=$TAG" >> $GITHUB_ENV
+        echo "urlRelease=https://github.com/KyleKolander/nuget-utilities/releases/tag/$version" >> $GITHUB_ENV
+        echo "releaseNameSummarizerWindows=Summarizer-$version-win-x64" >> $GITHUB_ENV
+        echo "releaseNameSummarizerLinux=Summarizer-$version-linux-x64" >> $GITHUB_ENV
+        echo "releaseNameSummarizerMac=Summarizer-$version-osx-x64" >> $GITHUB_ENV
+        echo "nupkgName=NuGetUtilities.Core.$version" >> $GITHUB_ENV
+
+    - name: verify environment variables
+      shell: bash
+      run: |
+        echo "version                      = $version"
+        echo "urlRelease                   = $urlRelease"
+        echo "releaseNameSummarizerWindows = $releaseNameSummarizerWindows"
+        echo "releaseNameSummarizerLinux   = $releaseNameSummarizerLinux"
+        echo "releaseNameSummarizerMac     = $releaseNameSummarizerMac"
+        echo "nupkgName                    = $nupkgName"
+
+    - name: set Version
+      shell: bash
+      run: |
+        echo "version = $version"
+        sed -i -r "s|<Version>([0-9]+\.[0-9]+\.[0-9]+)</Version>|<Version>$version</Version>|g" src/Directory.Build.props
+        cat src/Directory.Build.props
+
+    - name: dotnet restore
+      run: dotnet restore --verbosity minimal -graphBuild:true
+      
+    # Windows
+    - name: dotnet build win-x64
+      run: dotnet build --configuration ${{ env.buildConfiguration }} --runtime win-x64 --no-restore --nologo --verbosity minimal -graphBuild:true
+
+    - name: dotnet publish ${{ env.releaseNameSummarizerWindows }}
+      run: dotnet publish ${{ env.csprojPathSummarizer }} --output "${{ env.outDirPublish }}/${{ env.releaseNameSummarizerWindows }}" --runtime win-x64 --configuration ${{ env.buildConfiguration }} --no-build --nologo --self-contained false -p:PublishSingleFile=true
+
+    - name: prepare ${{ env.releaseNameSummarizerWindows }} release
+      shell: bash
+      run: 7z a -tzip "${{ env.outDirRelease }}/${{ env.releaseNameSummarizerWindows }}.zip" "${{ env.outDirPublish }}/${{ env.releaseNameSummarizerWindows }}/*"
+
+    # Mac
+    - name: dotnet build osx-x64
+      run: dotnet build --configuration ${{ env.buildConfiguration }} --runtime osx-x64 --no-restore --nologo --verbosity minimal -graphBuild:true
+
+    - name: dotnet publish ${{ env.releaseNameSummarizerMac }}
+      run: dotnet publish ${{ env.csprojPathSummarizer }} --output "${{ env.outDirPublish }}/${{ env.releaseNameSummarizerMac }}" --runtime osx-x64 --configuration ${{ env.buildConfiguration }} --no-build --nologo --self-contained false -p:PublishSingleFile=true
+
+    - name: prepare ${{ env.releaseNameSummarizerMac }} for release
+      shell: bash
+      run: mkdir -p $outDirRelease && tar czvf "$outDirRelease/$releaseNameSummarizerMac.tar.gz" "$outDirPublish/$releaseNameSummarizerMac/"
+
+    # Linux
+    - name: dotnet build linux-x64
+      run: dotnet build --configuration ${{ env.buildConfiguration }} --runtime linux-x64 --no-restore --nologo --verbosity minimal -graphBuild:true
+
+    - name: dotnet publish ${{ env.releaseNameSummarizerLinux }}
+      run: dotnet publish ${{ env.csprojPathSummarizer }} --output "${{ env.outDirPublish }}/${{ env.releaseNameSummarizerLinux }}" --runtime linux-x64 --configuration ${{ env.buildConfiguration }} --no-build --nologo --self-contained false -p:PublishSingleFile=true
+
+    - name: prepare ${{ env.releaseNameSummarizerLinux }} for release
+      shell: bash
+      run: mkdir -p $outDirRelease && tar czvf "$outDirRelease/$releaseNameSummarizerLinux.tar.gz" "$outDirPublish/$releaseNameSummarizerLinux/"
+     
+
+    - name: dotnet pack
+      run: dotnet pack --configuration ${{ env.buildConfiguration }} --runtime linux-x64 --nologo --include-symbols --include-source --output ${{ env.outDirPack }} -p:PackageReleaseNotes="See ${{ env.urlRelease }}" ${{ env.csprojPathCore }}
+        
+    - name: dotnet nuget push NuGetUtilities.Core to GPR
+      run: dotnet nuget push ${{ env.outDirPack }}/${{ env.nupkgName }}.nupkg --source ${{ env.urlNupkg }} --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
+
+    - name: upload NuGet package
+      uses: actions/upload-artifact@v2
+      with:
+        name: NuGetUtilities.Core NuGet package
+        path: ${{ env.outDirPack }}/*.nupkg
+
+    - name: upload Summarizer
+      uses: actions/upload-artifact@v2
+      with:
+        name: Summarizer
+        path: ${{ env.outDirRelease }}/*
+
+    - name: GitHub Release
+      uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        title: "${{ env.version }}"
+        prerelease: false
+        files: |
+          ${{ env.outDirRelease }}/${{ env.releaseNameSummarizerWindows }}.zip
+          ${{ env.outDirRelease }}/${{ env.releaseNameSummarizerLinux }}.tar.gz
+          ${{ env.outDirRelease }}/${{ env.releaseNameSummarizerMac }}.tar.gz
+          ${{ env.outDirPack }}/${{ env.nupkgName }}.nupkg
+
+    - name: NuGet.org Release
+      run: dotnet nuget push "${{ env.outDirPack }}/*.nupkg" --source ${{ env.urlNuGet }} --api-key ${{ secrets.nuget_api_key }} --skip-duplicate
+      #run: dotnet nuget push "${{ env.outDirPack }}/*.nupkg" --source ${{ env.urlNuGetTest }} --api-key ${{ secrets.nuget_test_api_key }} --skip-duplicate

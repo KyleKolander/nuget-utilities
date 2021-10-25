@@ -1,0 +1,32 @@
+<Project>
+	<PropertyGroup>
+		<TargetFramework>net5.0</TargetFramework>
+		<RuntimeIdentifiers>win-x64;linux-x64;osx-x64</RuntimeIdentifiers>
+		<RestoreUseStaticGraphEvaluation>true</RestoreUseStaticGraphEvaluation>
+		<WarnOnPackingNonPackableProject>true</WarnOnPackingNonPackableProject>
+		<Copyright>© 2021 Kyle Kolander.  All rights reserved.</Copyright>
+		<PackageProjectUrl>https://github.com/KyleKolander/nuget-utilities</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/KyleKolander/nuget-utilities</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<Authors>Kyle Kolander</Authors>
+		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+		<NeutralLanguage>en-US</NeutralLanguage>
+		<Version>0.0.1</Version>
+		<SignAssembly>true</SignAssembly>
+		<DelaySign>false</DelaySign>
+		<IsPackable>true</IsPackable>
+		<IsTestProject>false</IsTestProject>
+	</PropertyGroup>
+	<PropertyGroup>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
+		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+	</PropertyGroup>
+	<PropertyGroup>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<DebugType>portable</DebugType>
+		<DebugSymbols>true</DebugSymbols>
+		<Deterministic>true</Deterministic>
+	</PropertyGroup>
+</Project>

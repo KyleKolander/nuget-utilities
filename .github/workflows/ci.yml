@@ -1,0 +1,88 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+
+env:
+  buildConfiguration: Release
+  outDirPack: nupkgs
+  outDirPublish: publish
+  csprojPathCore: src/Core/Core.csproj
+  csprojPathSummarizer: src/Summarizer/Summarizer.csproj
+  DOTNET_NOLOGO: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        kind: ['linux', 'windows', 'macOS']
+        include:
+          - kind: linux
+            os: ubuntu-latest
+            target: linux-x64
+          - kind: windows
+            os: windows-latest
+            target: win-x64
+          - kind: macOS
+            os: macos-latest
+            target: osx-x64
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - name: checkout repository
+      uses: actions/checkout@v2
+
+    - name: setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+
+    - name: dotnet info
+      run: dotnet --info
+    
+    - name: set Version
+      shell: bash
+      run: |
+        version=0.0.$GITHUB_RUN_NUMBER
+        echo "version=$version" >> $GITHUB_ENV
+        echo "version = $version"
+        sed -i -r "s|<Version>([0-9]+\.[0-9]+\.[0-9]+)</Version>|<Version>$version</Version>|g" src/Directory.Build.props
+        cat src/Directory.Build.props
+
+    - name: dotnet restore
+      run: dotnet restore --verbosity minimal -graphBuild:true
+
+    - name: dotnet build
+      run: dotnet build --configuration ${{ env.buildConfiguration }} --runtime ${{ matrix.target }} --no-restore --nologo --verbosity minimal -graphBuild:true
+
+    - name: dotnet test
+      run: dotnet test --configuration ${{ env.buildConfiguration }} --runtime ${{ matrix.target }} --no-build --nologo --verbosity normal
+
+    - name: upload dotnet test results
+      uses: actions/upload-artifact@v2
+      with:
+        name: Integration TestResults ${{ matrix.os }}
+        path: test/TestResults/Integration_TestResults.*
+
+    - name: dotnet pack
+      if: matrix.os == 'ubuntu-latest'
+      run: dotnet pack --configuration ${{ env.buildConfiguration }} --runtime ${{ matrix.target }} --nologo --include-symbols --include-source --output ${{ env.outDirPack }} ${{ env.csprojPathCore }}
+
+    - name: upload NuGet package
+      if: matrix.os == 'ubuntu-latest'
+      uses: actions/upload-artifact@v2
+      with:
+        name: NuGetUtilities.Core NuGet package
+        path: ${{ env.outDirPack }}/*.nupkg
+
+    - name: dotnet publish Summarizer ${{ matrix.os }}
+      run: dotnet publish ${{ env.csprojPathSummarizer }} --output "${{ env.outDirPublish }}/Summarizer-${{ env.version }}-${{ matrix.target }}" --runtime ${{ matrix.target }} --configuration ${{ env.buildConfiguration }} --no-build --nologo --self-contained false -p:PublishSingleFile=true
+
+    - name: upload Summarizer-${{ env.version }}-${{ matrix.target }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: Summarizer-${{ env.version }}-${{ matrix.target }}
+        path: ${{ env.outDirPublish }}/Summarizer-${{ env.version }}-${{ matrix.target }}/*
