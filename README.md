@@ -36,7 +36,7 @@ scripts\build.ps1 -Runtime win-x64 -Version 0.0.2
 ##### Run the Summarizer project
 
 ```powershell
-cd src\Summarizer\bin\Debug\net5.0\
+cd src\Summarizer\bin\Release\net5.0\win-x64
 
 .\NuGetUtilities.Summarizer.exe --id MailKit `
                                 --version 2.15.0 `
