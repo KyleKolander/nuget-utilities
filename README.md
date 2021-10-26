@@ -1,17 +1,10 @@
 # NuGet Utilities
 
-#### Powerful NuGet Utilities library and Summarizer app
+#### Powerful cross-platform NuGet Utilities library and Summarizer app
 
-[![Build](https://github.com/KyleKolander/nuget-utilities/actions/workflows/ci.yml/badge.svg)](https://github.com/KyleKolander/nuget-utilities/actions/workflows/ci.yml)
-[![Release](https://github.com/KyleKolander/nuget-utilities/actions/workflows/release.yml/badge.svg)](https://github.com/KyleKolander/nuget-utilities/actions/workflows/release.yml)
-[![NuGet](https://img.shields.io/nuget/v/NuGetUtilities.Core.svg)](https://www.nuget.org/packages/NuGetUtilities.Core/)
-[![GitHub license](https://img.shields.io/badge/license-MIT%20-blue.svg)](LICENSE)
+[![Build](https://github.com/KyleKolander/nuget-utilities/actions/workflows/ci.yml/badge.svg)](https://github.com/KyleKolander/nuget-utilities/actions/workflows/ci.yml) [![Release](https://github.com/KyleKolander/nuget-utilities/actions/workflows/release.yml/badge.svg)](https://github.com/KyleKolander/nuget-utilities/actions/workflows/release.yml) [![NuGet](https://img.shields.io/nuget/v/NuGetUtilities.Core.svg)](https://www.nuget.org/packages/NuGetUtilities.Core/) [![GitHub license](https://img.shields.io/badge/license-MIT%20-blue.svg)](LICENSE)
 
-The Core library provides the ability to programmatically retrieve, install and read NuGet packages, determine transitive dependencies, and build the entire dependency tree.
-
-The Summarizer console app demonstrates how to use the library and makes it simple to ascertain any of this information without writing code.
-
-I used various packages from the [NuGet.Client](https://github.com/NuGet/NuGet.Client) repo.  While there is plenty of documentation on how to use the resulting tool(s), there is very little documentation on how to use the libraries.
+Use the Core library to programmatically retrieve, install and read NuGet packages, determine transitive dependencies, and build the entire dependency tree. The Summarizer console app demonstrates how to use the library and makes it simple to ascertain any of this information without writing code.  I used various packages from the [NuGet.Client](https://github.com/NuGet/NuGet.Client) repo.  While there is plenty of documentation on how to use the resulting tool(s), there is very little documentation on how to use the libraries.
 
 ## Motivation
 
@@ -27,49 +20,20 @@ PowerShell lacks the ability to use a NuGet package with transitive dependencies
 
 ## Getting Started
 
-Clone the repo
+##### Clone the repo
 
 ```powershell
 git clone https://github.com/KyleKolander/nuget-utilities
 cd nuget-utilities
 ```
 
-Build the solution
+##### Restore, build, test, pack and publish
 
 ```powershell
-dotnet build .\NuGetUtilities.sln --nologo
+scripts\build.ps1 -Runtime win-x64 -Version 0.0.2
 ```
 
-Run the tests
-
-```powershell
-dotnet test .\test\Integration\Integration.csproj
-```
-
-Install Report Generator as a dotnet global tool (one-time setup)
-
-```powershell
-# Run as Administrator in PowerShell Core
-dotnet tool install --global dotnet-reportgenerator-globaltool --version 4.8.9 
-dotnet tool install dotnet-reportgenerator-globaltool --tool-path tools 
-dotnet new tool-manifest 
-dotnet tool install dotnet-reportgenerator-globaltool
-```
-
-View code coverage report
-
-```powershell
-reportgenerator -reports:"./test/CoverageResults/*_coverage.cobertura.xml" `
-                -targetdir:./test/CoverageResults `
-                -reporttypes:"HtmlInline;TextSummary;Badges;Cobertura" `
-                -title:"NuGet Utilties - Code Coverage"
-
-Get-Content "./test/CoverageResults/Summary.txt"
-
-Start-Process chrome -ArgumentList $(Resolve-Path ./test/CoverageResults/index.html)
-```
-
-Run the Summarizer project
+##### Run the Summarizer project
 
 ```powershell
 cd src\Summarizer\bin\Debug\net5.0\
@@ -83,6 +47,45 @@ cd src\Summarizer\bin\Debug\net5.0\
                                 --contents `
                                 --assemblies `
                                 --powerShell
+```
+
+##### Summarizer output
+
+```powershell
+Transitive Dependencies
+============
+Microsoft.NETCore.Platforms.2.0.0
+Portable.BouncyCastle.1.8.10
+System.Buffers.4.5.1
+System.Reflection.TypeExtensions.4.4.0
+System.Security.Cryptography.Cng.4.7.0
+System.Security.Cryptography.Pkcs.4.7.0 : System.Security.Cryptography.Cng [4.7.0, )
+System.Text.Encoding.CodePages.4.4.0 : Microsoft.NETCore.Platforms [2.0.0, )
+MimeKit.2.15.0 : Portable.BouncyCastle [1.8.10, ), System.Buffers [4.5.1, ), System.Reflection.TypeExtensions [4.4.0, ), System.Security.Cryptography.Pkcs [4.7.0, ), System.Text.Encoding.CodePages [4.4.0, )
+MailKit.2.15.0 : MimeKit [2.15.0, )
+
+Dependency Tree
+============
+mailkit.2.15.0  {net5.0}
+    mimekit.2.15.0  [2.15.0, )
+        system.security.cryptography.pkcs.4.7.0  [4.7.0, )
+            system.security.cryptography.cng.4.7.0  [4.7.0, )
+        system.reflection.typeextensions.4.4.0  [4.4.0, )
+        system.text.encoding.codepages.4.4.0  [4.4.0, )
+            microsoft.netcore.platforms.2.0.0  [2.0.0, )
+        system.buffers.4.5.1  [4.5.1, )
+        portable.bouncycastle.1.8.10  [1.8.10, )
+
+PowerShell Commands to use NuGet Package: mailkit.2.15.0
+================================================================================
+Add-Type -Path 'c:\users\kyle\.nuget\packages\portable.bouncycastle\1.8.10\lib\netstandard2.0\BouncyCastle.Crypto.dll'
+Add-Type -Path 'c:\users\kyle\.nuget\packages\system.security.cryptography.cng\4.7.0\lib\netcoreapp3.0\System.Security.Cryptography.Cng.dll'
+Add-Type -Path 'c:\users\kyle\.nuget\packages\system.security.cryptography.pkcs\4.7.0\lib\netcoreapp3.0\System.Security.Cryptography.Pkcs.dll'
+Add-Type -Path 'c:\users\kyle\.nuget\packages\system.text.encoding.codepages\4.4.0\lib\netstandard2.0\System.Text.Encoding.CodePages.dll'
+Add-Type -Path 'c:\users\kyle\.nuget\packages\mimekit\2.15.0\lib\net50\MimeKit.dll'
+Add-Type -Path 'c:\users\kyle\.nuget\packages\mailkit\2.15.0\lib\net50\MailKit.dll'
+
+*** not all output shown
 ```
 
 ## Code Example
@@ -110,4 +113,4 @@ var authors                = installedPackageContents.NuspecReader.GetAuthors();
 
 ## API Reference
 
-![Flow Diagrams](diagrams/Flow.png?raw=true)
+![Flow Diagrams](https://raw.githubusercontent.com/KyleKolander/nuget-utilities/main/diagrams/Flow.png)
