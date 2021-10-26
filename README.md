@@ -2,7 +2,7 @@
 
 #### Powerful cross-platform NuGet Utilities library and Summarizer app
 
-[![Build](https://github.com/KyleKolander/nuget-utilities/actions/workflows/ci.yml/badge.svg)](https://github.com/KyleKolander/nuget-utilities/actions/workflows/ci.yml) [![Release](https://github.com/KyleKolander/nuget-utilities/actions/workflows/release.yml/badge.svg)](https://github.com/KyleKolander/nuget-utilities/actions/workflows/release.yml) [![NuGet](https://img.shields.io/nuget/v/NuGetUtilities.Core.svg)](https://www.nuget.org/packages/NuGetUtilities.Core/) [![GitHub license](https://img.shields.io/badge/license-MIT%20-blue.svg)](LICENSE)
+[![Build](https://github.com/KyleKolander/nuget-utilities/actions/workflows/ci.yml/badge.svg)](https://github.com/KyleKolander/nuget-utilities/actions/workflows/ci.yml) [![Release](https://github.com/KyleKolander/nuget-utilities/actions/workflows/release.yml/badge.svg)](https://github.com/KyleKolander/nuget-utilities/actions/workflows/release.yml) [![NuGet](https://img.shields.io/nuget/v/NuGetUtilities.Core.svg)](https://www.nuget.org/packages/NuGetUtilities.Core/) [![GitHub license](https://img.shields.io/badge/license-MIT%20-blue.svg)](https://raw.githubusercontent.com/KyleKolander/nuget-utilities/main/LICENSE)
 
 Use the Core library to programmatically retrieve, install and read NuGet packages, determine transitive dependencies, and build the entire dependency tree. The Summarizer console app demonstrates how to use the library and makes it simple to ascertain any of this information without writing code.  I used various packages from the [NuGet.Client](https://github.com/NuGet/NuGet.Client) repo.  While there is plenty of documentation on how to use the resulting tool(s), there is very little documentation on how to use the libraries.
 
@@ -51,7 +51,7 @@ cd src\Summarizer\bin\Debug\net5.0\
 
 ##### Summarizer output
 
-```powershell
+```
 Transitive Dependencies
 ============
 Microsoft.NETCore.Platforms.2.0.0
