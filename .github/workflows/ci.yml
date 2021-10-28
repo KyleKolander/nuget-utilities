@@ -53,13 +53,13 @@ jobs:
         cat src/Directory.Build.props
 
     - name: dotnet restore
-      run: dotnet restore --verbosity minimal -graphBuild:true
+      run: dotnet restore --runtime ${{ matrix.target }} --verbosity minimal -graphBuild:true
 
     - name: dotnet build
-      run: dotnet build --configuration ${{ env.buildConfiguration }} --runtime ${{ matrix.target }} --no-restore --nologo --verbosity minimal -graphBuild:true
+      run: dotnet build --configuration ${{ env.buildConfiguration }} --runtime ${{ matrix.target }} --no-restore --nologo --verbosity minimal -graphBuild:true -p:SelfContained=false
 
     - name: dotnet test
-      run: dotnet test --configuration ${{ env.buildConfiguration }} --runtime ${{ matrix.target }} --no-build --nologo --verbosity normal
+      run: dotnet test --configuration ${{ env.buildConfiguration }} --runtime ${{ matrix.target }} --no-build --nologo --verbosity normal -p:SelfContained=false
 
     - name: upload dotnet test results
       uses: actions/upload-artifact@v2
@@ -69,7 +69,7 @@ jobs:
 
     - name: dotnet pack
       if: matrix.os == 'ubuntu-latest'
-      run: dotnet pack --configuration ${{ env.buildConfiguration }} --runtime ${{ matrix.target }} --nologo --include-symbols --include-source --output ${{ env.outDirPack }} ${{ env.csprojPathCore }}
+      run: dotnet pack --configuration ${{ env.buildConfiguration }} --runtime ${{ matrix.target }} --nologo --include-symbols --include-source --output ${{ env.outDirPack }} -p:SelfContained=false ${{ env.csprojPathCore }}
 
     - name: upload NuGet package
       if: matrix.os == 'ubuntu-latest'
@@ -79,7 +79,7 @@ jobs:
         path: ${{ env.outDirPack }}/*.nupkg
 
     - name: dotnet publish Summarizer ${{ matrix.os }}
-      run: dotnet publish ${{ env.csprojPathSummarizer }} --output "${{ env.outDirPublish }}/Summarizer-${{ env.version }}-${{ matrix.target }}" --runtime ${{ matrix.target }} --configuration ${{ env.buildConfiguration }} --no-build --nologo --self-contained false -p:PublishSingleFile=true
+      run: dotnet publish ${{ env.csprojPathSummarizer }} --output "${{ env.outDirPublish }}/Summarizer-${{ env.version }}-${{ matrix.target }}" --runtime ${{ matrix.target }} --configuration ${{ env.buildConfiguration }} --no-build --nologo  -p:SelfContained=false -p:PublishSingleFile=true
 
     - name: upload Summarizer-${{ env.version }}-${{ matrix.target }}
       uses: actions/upload-artifact@v2

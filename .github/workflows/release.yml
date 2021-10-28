@@ -73,14 +73,14 @@ jobs:
         cat src/Directory.Build.props
 
     - name: dotnet restore
-      run: dotnet restore --verbosity minimal -graphBuild:true
+      run: dotnet restore --runtime ${{ matrix.target }} --verbosity minimal -graphBuild:true
       
     # Windows
     - name: dotnet build win-x64
-      run: dotnet build --configuration ${{ env.buildConfiguration }} --runtime win-x64 --no-restore --nologo --verbosity minimal -graphBuild:true
+      run: dotnet build --configuration ${{ env.buildConfiguration }} --runtime win-x64 --no-restore --nologo --verbosity minimal -graphBuild:true -p:SelfContained=false
 
     - name: dotnet publish ${{ env.releaseNameSummarizerWindows }}
-      run: dotnet publish ${{ env.csprojPathSummarizer }} --output "${{ env.outDirPublish }}/${{ env.releaseNameSummarizerWindows }}" --runtime win-x64 --configuration ${{ env.buildConfiguration }} --no-build --nologo --self-contained false -p:PublishSingleFile=true
+      run: dotnet publish ${{ env.csprojPathSummarizer }} --output "${{ env.outDirPublish }}/${{ env.releaseNameSummarizerWindows }}" --runtime win-x64 --configuration ${{ env.buildConfiguration }} --no-build --nologo -p:SelfContained=false -p:PublishSingleFile=true
 
     - name: prepare ${{ env.releaseNameSummarizerWindows }} release
       shell: bash
@@ -88,10 +88,10 @@ jobs:
 
     # Mac
     - name: dotnet build osx-x64
-      run: dotnet build --configuration ${{ env.buildConfiguration }} --runtime osx-x64 --no-restore --nologo --verbosity minimal -graphBuild:true
+      run: dotnet build --configuration ${{ env.buildConfiguration }} --runtime osx-x64 --no-restore --nologo --verbosity minimal -graphBuild:true -p:SelfContained=false
 
     - name: dotnet publish ${{ env.releaseNameSummarizerMac }}
-      run: dotnet publish ${{ env.csprojPathSummarizer }} --output "${{ env.outDirPublish }}/${{ env.releaseNameSummarizerMac }}" --runtime osx-x64 --configuration ${{ env.buildConfiguration }} --no-build --nologo --self-contained false -p:PublishSingleFile=true
+      run: dotnet publish ${{ env.csprojPathSummarizer }} --output "${{ env.outDirPublish }}/${{ env.releaseNameSummarizerMac }}" --runtime osx-x64 --configuration ${{ env.buildConfiguration }} --no-build --nologo -p:SelfContained=false -p:PublishSingleFile=true
 
     - name: prepare ${{ env.releaseNameSummarizerMac }} for release
       shell: bash
@@ -99,10 +99,10 @@ jobs:
 
     # Linux
     - name: dotnet build linux-x64
-      run: dotnet build --configuration ${{ env.buildConfiguration }} --runtime linux-x64 --no-restore --nologo --verbosity minimal -graphBuild:true
+      run: dotnet build --configuration ${{ env.buildConfiguration }} --runtime linux-x64 --no-restore --nologo --verbosity minimal -graphBuild:true -p:SelfContained=false
 
     - name: dotnet publish ${{ env.releaseNameSummarizerLinux }}
-      run: dotnet publish ${{ env.csprojPathSummarizer }} --output "${{ env.outDirPublish }}/${{ env.releaseNameSummarizerLinux }}" --runtime linux-x64 --configuration ${{ env.buildConfiguration }} --no-build --nologo --self-contained false -p:PublishSingleFile=true
+      run: dotnet publish ${{ env.csprojPathSummarizer }} --output "${{ env.outDirPublish }}/${{ env.releaseNameSummarizerLinux }}" --runtime linux-x64 --configuration ${{ env.buildConfiguration }} --no-build --nologo -p:SelfContained=false -p:PublishSingleFile=true
 
     - name: prepare ${{ env.releaseNameSummarizerLinux }} for release
       shell: bash
@@ -110,7 +110,7 @@ jobs:
      
 
     - name: dotnet pack
-      run: dotnet pack --configuration ${{ env.buildConfiguration }} --runtime linux-x64 --nologo --include-symbols --include-source --output ${{ env.outDirPack }} -p:PackageReleaseNotes="See ${{ env.urlRelease }}" ${{ env.csprojPathCore }}
+      run: dotnet pack --configuration ${{ env.buildConfiguration }} --runtime linux-x64 --nologo --include-symbols --include-source --output ${{ env.outDirPack }} -p:SelfContained=false -p:PackageReleaseNotes="See ${{ env.urlRelease }}" ${{ env.csprojPathCore }}
         
     - name: dotnet nuget push NuGetUtilities.Core to GPR
       run: dotnet nuget push ${{ env.outDirPack }}/${{ env.nupkgName }}.nupkg --source ${{ env.urlNupkg }} --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
