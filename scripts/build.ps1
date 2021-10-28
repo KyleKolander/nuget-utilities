@@ -15,7 +15,7 @@ function Write-Header([string]$Message) {
 }
 
 Write-Header 'Restore'
-dotnet restore --runtime $Runtime --verbosity minimal -graphBuild:true
+dotnet restore --verbosity minimal -graphBuild:true
 
 Write-Header 'Build'
 dotnet build --configuration $Configuration --runtime $Runtime -p:Version=$Version --no-restore --nologo --verbosity minimal -graphBuild:true -p:SelfContained=false
@@ -32,8 +32,7 @@ dotnet publish .\src\Summarizer\Summarizer.csproj --output "$OutDirPublish/Summa
 #
 # https://github.com/dotnet/runtime/issues/3569#issuecomment-920285890
 #
-# Need to use --runtime $Runtime on each step.
-# Need to use -p:SelfContained=false on each step except restore.
+# Need to use --runtime $Runtime and -p:SelfContained=false on each step except restore.
 #
 # Without this, the published single file executable will not run and you'll have errors like this:
 #

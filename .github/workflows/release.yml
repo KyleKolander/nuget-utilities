@@ -73,7 +73,7 @@ jobs:
         cat src/Directory.Build.props
 
     - name: dotnet restore
-      run: dotnet restore --runtime ${{ matrix.target }} --verbosity minimal -graphBuild:true
+      run: dotnet restore --verbosity minimal -graphBuild:true
       
     # Windows
     - name: dotnet build win-x64
