@@ -24,32 +24,32 @@ namespace NuGetUtilities.Summarizer
     [ExcludeFromCodeCoverage]
     public class Summarizer : IHostedService
     {
-        public Summarizer(ILogger<Summarizer>      logger
+        public Summarizer(ILogger<Summarizer> logger
                         , IHostApplicationLifetime appLifetime
-                        , PackageRetriever         packageRetriever
-                        , PackageInstaller         packageInstaller
-                        , PackageReader            packageReader
-                        , DependencyTreeBuilder    dependencyTreeBuilder)
+                        , PackageRetriever packageRetriever
+                        , PackageInstaller packageInstaller
+                        , PackageReader packageReader
+                        , DependencyTreeBuilder dependencyTreeBuilder)
         {
-            Logger                = logger;
-            AppLifetime           = appLifetime;
-            PackageRetriever      = packageRetriever;
-            PackageInstaller      = packageInstaller;
-            PackageReader         = packageReader;
+            Logger = logger;
+            AppLifetime = appLifetime;
+            PackageRetriever = packageRetriever;
+            PackageInstaller = packageInstaller;
+            PackageReader = packageReader;
             DependencyTreeBuilder = dependencyTreeBuilder;
         }
 
-        private ILogger<Summarizer>      Logger                { get; }
-        private IHostApplicationLifetime AppLifetime           { get; }
-        private PackageRetriever         PackageRetriever      { get; }
-        public  PackageInstaller         PackageInstaller      { get; }
-        public  PackageReader            PackageReader         { get; }
-        private DependencyTreeBuilder    DependencyTreeBuilder { get; }
-        private int                      ExitCode              { get; set; }
+        private ILogger<Summarizer> Logger { get; }
+        private IHostApplicationLifetime AppLifetime { get; }
+        private PackageRetriever PackageRetriever { get; }
+        public PackageInstaller PackageInstaller { get; }
+        public PackageReader PackageReader { get; }
+        private DependencyTreeBuilder DependencyTreeBuilder { get; }
+        private int ExitCode { get; set; }
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            Logger.LogDebug($"Starting with arguments: {string.Join(" ", Environment.GetCommandLineArgs())}");
+            Logger.LogDebug($"Starting with arguments: {string.Join(" ", Environment.GetCommandLineArgs().Skip(1).ToArray())}");
 
             // "commandLineArgs": "--id MailKit --version 2.15.0 --framework net5.0 --install --transitive --tree --contents --assemblies --powerShell",
 
@@ -86,8 +86,8 @@ namespace NuGetUtilities.Summarizer
                                     , new Option<bool>("--powerShell", "Flag indicating whether to display the PowerShell commands needed to use the specified NuGet package")
                                   };
                 rootCommand.Description = "NuGet package summarizer";
-                rootCommand.Handler     = CommandHandler.Create<string, string, string, string, bool, bool, bool, bool, bool, bool>(Run);
-                await rootCommand.InvokeAsync(Environment.GetCommandLineArgs());
+                rootCommand.Handler = CommandHandler.Create<string, string, string, string, bool, bool, bool, bool, bool, bool>(Run);
+                await rootCommand.InvokeAsync(Environment.GetCommandLineArgs().Skip(1).ToArray());
             }
             catch (Exception e)
             {
@@ -141,27 +141,27 @@ namespace NuGetUtilities.Summarizer
                 Logger.LogDebug("--contents specified but not --install, which is a prerequisite, so adding --install");
             }
 
-            var             nuGetFramework = NuGetFramework.ParseFolder(framework);
-            Package         package;
+            var nuGetFramework = NuGetFramework.ParseFolder(framework);
+            Package package;
             PackageIdentity packageIdentity;
 
             if (string.IsNullOrWhiteSpace(nupkg))
             {
                 packageIdentity = new(id, NuGetVersion.Parse(version));
-                package         = await HandleRetrieve(packageIdentity, nuGetFramework);
+                package = await HandleRetrieve(packageIdentity, nuGetFramework);
             }
             else
             {
-                package         = await PackageInstaller.Install(nupkg, nuGetFramework, CancellationToken.None);
+                package = await PackageInstaller.Install(nupkg, nuGetFramework, CancellationToken.None);
                 packageIdentity = package.PackageIdentity;
             }
 
-            var transitiveDependencies   = await HandleTransitiveDependencies(transitive, package, nuGetFramework);
-            var rootNode                 = HandleTree(tree, transitive, package, transitiveDependencies);
-            var installedPackages        = await HandleInstall(install, package, transitiveDependencies);
+            var transitiveDependencies = await HandleTransitiveDependencies(transitive, package, nuGetFramework);
+            var rootNode = HandleTree(tree, transitive, package, transitiveDependencies);
+            var installedPackages = await HandleInstall(install, package, transitiveDependencies);
             var installedPackageContents = HandleContents(contents, installedPackages);
-            var assemblyItems            = HandleAssemblies(assemblies, installedPackageContents);
-            var powerShellCommands       = HandlePowerShell(powerShell, package, installedPackageContents);
+            var assemblyItems = HandleAssemblies(assemblies, installedPackageContents);
+            var powerShellCommands = HandlePowerShell(powerShell, package, installedPackageContents);
         }
 
         private async Task<Package> HandleRetrieve(PackageIdentity packageIdentity, NuGetFramework nuGetFramework)
